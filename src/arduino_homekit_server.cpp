@@ -14,7 +14,7 @@
 #include <wolfssl/wolfcrypt/hash.h> //wc_sha512
 
 #include "constants.h"
-#include "base64.h"
+#include "homekit_base64.h"
 #include "pairing.h"
 #include "storage.h"
 #include "query_params.h"
@@ -2395,9 +2395,9 @@ void homekit_server_on_update_characteristics(client_context_t *context, const b
 
 		cJSON *j_ch = cJSON_GetArrayItem(characteristics, i);
 
-		char *s = cJSON_Print(j_ch);
-		CLIENT_DEBUG(context, "Processing element %s", s);
-		free(s);
+		//char *s = cJSON_Print(j_ch);
+		//CLIENT_DEBUG(context, "Processing element %s", s);
+		//free(s);
 
 		statuses[i] = process_characteristics_update(j_ch, context);
 

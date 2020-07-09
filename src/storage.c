@@ -62,10 +62,10 @@ extern uint32_t _SPIFFS_start; //See spiffs_api.h
 #define STORAGE_BASE_ADDR HOMEKIT_EEPROM_PHYS_ADDR//0x200000
 //#endif
 
-#define MAGIC_OFFSET           0
-#define ACCESSORY_ID_OFFSET    4
-#define ACCESSORY_KEY_OFFSET   32
-#define PAIRINGS_OFFSET        128
+#define MAGIC_OFFSET           0 + 2048
+#define ACCESSORY_ID_OFFSET    4 + 2048
+#define ACCESSORY_KEY_OFFSET   32 + 2048
+#define PAIRINGS_OFFSET        128 + 2048
 
 #define MAGIC_ADDR           (STORAGE_BASE_ADDR + MAGIC_OFFSET)
 #define ACCESSORY_ID_ADDR    (STORAGE_BASE_ADDR + ACCESSORY_ID_OFFSET)
@@ -110,10 +110,27 @@ int homekit_storage_init() {
 
     if (strncmp(magic, magic1, sizeof(magic1))) {
         INFO("Formatting HomeKit storage at 0x%x", STORAGE_BASE_ADDR);
-        if (!spiflash_erase_sector(STORAGE_BASE_ADDR)) {
+        byte *data = malloc(2048);
+        if (!spiflash_read(STORAGE_BASE_ADDR, data, 2048))
+        {
+            free(data);
+            ERROR("Failed to read eeprom storage: sector data read error");
+            return -1;
+        }
+        if (!spiflash_erase_sector(STORAGE_BASE_ADDR))
+        {
+            free(data);
             ERROR("Failed to erase HomeKit storage");
             return -1;
         }
+
+        if (!spiflash_write(STORAGE_BASE_ADDR, data, 2048))
+        {
+            ERROR("Failed to write errprom storage: error writing compacted data");
+            free(data);
+            return -1;
+        }
+        free(data);
 
         strncpy(magic, magic1, sizeof(magic));
         if (!spiflash_write(MAGIC_ADDR, (byte *)magic, sizeof(magic))) {

@@ -3,6 +3,7 @@
 
 #include "homekit_debug.h"
 
+void (*on_homekit_log)(PGM_P formatP, ...);
 
 char *binary_to_string(const byte *data, size_t size) {
     int i;
