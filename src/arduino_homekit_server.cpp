@@ -3585,6 +3585,14 @@ void arduino_homekit_setup(homekit_server_config_t *config) {
 void arduino_homekit_loop() {
 	if (homekit_mdns_started) {
 		MDNS.update();
+
+        static uint32_t next_announce_millis = 0;
+        uint32_t time = millis();
+        if (time > next_announce_millis)
+        {
+            MDNS.announce();
+            next_announce_millis = time + 5000;
+        }
 	}
 	if (running_server != nullptr) {
 		if (!running_server->paired) {
